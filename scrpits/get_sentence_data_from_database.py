@@ -21,16 +21,18 @@ class GetPostDataFromDatabase:
         temp_data = []
         for each in data:
             if each[1] > score:
-                sentences_list = manager.clean_post_split_to_sentence(SentenceDataManager.clean_html_tags(each[2]))
-                for sentence in sentences_list:
-                    if sentence != " ":
-                        temp_dict = {
-                            "id": each[0],
-                            "score": each[1],
-                            "body": sentence,
-                            "title": each[3]
-                        }
-                        temp_data.append(temp_dict)
+                clean_post = SentenceDataManager.clean_html_tags(each[2])
+                if SentenceDataManager.contains_api_name(clean_post):
+                    sentences_list = manager.clean_post_split_to_sentence(clean_post)
+                    sentence_list = list(set(sentences_list).difference({" "}))
+
+                    temp_dict = {
+                        "id": each[0],
+                        "score": each[1],
+                        "body": sentence_list,
+                        "title": each[3]
+                    }
+                    temp_data.append(temp_dict)
         SentenceDataManager.write_list_to_json(temp_data, PathUtil.post_data_json())
 
 
