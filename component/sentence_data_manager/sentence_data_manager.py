@@ -11,6 +11,7 @@ from component.sentence_data_manager.spacy_model import spacy_model
 
 class SentenceDataManager:
     connection = None
+    nlp = None
 
     def __init__(self, host, user, password, db, charset="utf8", port=3306):
         self.host = host
@@ -19,7 +20,6 @@ class SentenceDataManager:
         self.password = password
         self.db = db
         self.charset = charset
-        self.nlp = spacy_model()
 
     def get_connection(self):
         self.connection = pymysql.connect(
@@ -47,12 +47,15 @@ class SentenceDataManager:
         file_object.write(json_obj)
         file_object.close()
 
-    def clean_post_split_to_sentence(self, clean_post):
+    @classmethod
+    def clean_post_split_to_sentence(cls, clean_post):
         """
         使用spacy将post解析，切割成句子
         :return:
         """
-        doc = self.nlp(clean_post)
+        if cls.nlp is None:
+            cls.nlp = spacy_model()
+        doc = cls.nlp(clean_post)
         sentences = doc.sents
         return [item.text for item in sentences]
 
@@ -69,16 +72,6 @@ class SentenceDataManager:
                 code.replace_with("_CODE_")
         string_list = bs.stripped_strings
         return ' '.join(string_list).replace("\n", "")
-
-    @staticmethod
-    def clean_code_part(post):
-        """
-        把post里的code标签替换成_CODE_.用bs做还是字符串匹配？
-        :param post:
-        :return:
-        """
-
-        pass
 
     @staticmethod
     def contains_api_name(post):
