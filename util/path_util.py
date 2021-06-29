@@ -10,7 +10,25 @@ class PathUtil:
         return str(path / "{filename}".format(filename=filename))
 
     @classmethod
+    def post_data_with_type_json(cls, filename="post_data_with_posttype.json"):
+        path = Path(DATA_DIR)
+        path.mkdir(exist_ok=True)
+        return str(path / "{filename}".format(filename=filename))
+
+    @classmethod
+    def post_data_from_java_answer(cls, filename="post_data_from_answer.json"):
+        path = Path(DATA_DIR)
+        path.mkdir(exist_ok=True)
+        return str(path / "{filename}".format(filename=filename))
+
+    @classmethod
     def sentence_data_json(cls, filename="sentence_data.json"):
+        path = Path(DATA_DIR)
+        path.mkdir(exist_ok=True)
+        return str(path / "{filename}".format(filename=filename))
+
+    @classmethod
+    def sentence_data_from_answer_json(cls, filename="sentence_data_from_answer.json"):
         path = Path(DATA_DIR)
         path.mkdir(exist_ok=True)
         return str(path / "{filename}".format(filename=filename))
@@ -28,19 +46,49 @@ class PathUtil:
         return str(path / "{filename}".format(filename=filename))
 
     @classmethod
-    def api_sentence_classifier_model(cls, filename="api_sentence_model.bin"):
+    def api_sentence_classifier_model(cls, filename="api_sentence_model", date="0618"):
+        path = Path(DATA_DIR)
+        path.mkdir(exist_ok=True)
+        return str(path / "{filename}_{date}.bin".format(filename=filename, date=date))
+
+    @classmethod
+    def api_sentence_classifier_train_data(cls, filename="api_sentence_train", date="0617"):
+        path = Path(DATA_DIR)
+        path.mkdir(exist_ok=True)
+        return str(path / "{filename}_{date}.txt".format(filename=filename, date=date))
+
+    @classmethod
+    def api_sentence_classifier_test_data(cls, filename="api_sentence_test", date="0617"):
+        path = Path(DATA_DIR)
+        path.mkdir(exist_ok=True)
+        return str(path / "{filename}_{date}.txt".format(filename=filename, date=date))
+
+    @classmethod
+    def api_name_json(cls, time, filename="api_name"):
+        path = Path(DATA_DIR)
+        path.mkdir(exist_ok=True)
+        return str(path / "{filename}_{time}.json".format(filename=filename, time=time))
+
+    @classmethod
+    def jdk_graph(cls, filename="jdk.v1.graph"):
         path = Path(DATA_DIR)
         path.mkdir(exist_ok=True)
         return str(path / "{filename}".format(filename=filename))
 
     @classmethod
-    def api_sentence_classifier_train_data(cls, filename="api_sentence_train.txt"):
+    def api_name_from_jdk_graph(cls, filename="jdk_api_name.json"):
         path = Path(DATA_DIR)
         path.mkdir(exist_ok=True)
         return str(path / "{filename}".format(filename=filename))
 
     @classmethod
-    def api_name_json(cls, filename="api_name.json"):
+    def test_data_json(cls, filename='test.json'):
         path = Path(DATA_DIR)
         path.mkdir(exist_ok=True)
         return str(path / "{filename}".format(filename=filename))
+
+    @classmethod
+    def labeled_data(cls, filename="labeled_sentence", date="0617"):
+        path = Path(DATA_DIR)
+        path.mkdir(exist_ok=True)
+        return str(path / "{filename}_{date}.csv".format(filename=filename, date=date))

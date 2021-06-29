@@ -4,3 +4,6 @@ pymysql~=1.0.2
 fasttext~=0.9.2
 tqdm~=4.61.0
 py2neo~=2021.1.4
+sekg~=0.10.4.22
+bs4~=0.0.1
+kgdt~=0.3.1

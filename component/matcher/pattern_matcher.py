@@ -1,0 +1,1 @@
+# 输入一个句子和一个pattren判断是否匹配 匹配的话就生成一个新的APIKnowledgeInstance

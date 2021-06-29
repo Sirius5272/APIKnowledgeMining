@@ -35,8 +35,23 @@ class APISentenceClassifier:
         else:
             raise ValueError("api sentence classifier model not exist")
 
+    def test(self, test_data_path=PathUtil.api_sentence_classifier_test_data()):
+        if self.classifier is None:
+            self.load()
+        result = self.classifier.test(test_data_path)
+        print(result)
+
     def is_api_sentence(self, sentence):
-        pass
+        if self.classifier is None:
+            self.load()
+        result = self.classifier.predict([sentence])
+        if result[0][0][0] == '__label__0':
+            return False
+        elif result[0][0][0] == '__label__1':
+            return True
 
     def get_score(self, sentence):
-        pass
+        if self.classifier is None:
+            self.load()
+        result = self.classifier.predict([sentence])
+        return result[1][0][0]

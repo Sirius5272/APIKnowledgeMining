@@ -6,29 +6,25 @@ import json
 from bs4 import BeautifulSoup
 import re
 import pymysql
+from util.path_util import PathUtil
 from component.sentence_data_manager.spacy_model import spacy_model
 
 
 class SentenceDataManager:
-    connection = None
     nlp = None
+    api_alias_to_qualified_name_dict = None
 
-    def __init__(self, host, user, password, db, charset="utf8", port=3306):
-        self.host = host
-        self.port = port
-        self.user = user
-        self.password = password
-        self.db = db
-        self.charset = charset
+    def __init__(self):
+        self.connection = None
 
-    def get_connection(self):
+    def get_connection(self, host, user, password, db, charset='utf-8', port=3306):
         self.connection = pymysql.connect(
-            host=self.host,
-            port=self.port,
-            user=self.user,
-            password=self.password,
-            db=self.db,
-            charset=self.charset
+            host=host,
+            port=port,
+            user=user,
+            password=password,
+            db=db,
+            charset=charset
         )
 
     def execute_sql(self, sql):
@@ -69,17 +65,38 @@ class SentenceDataManager:
 
         for pre in bs.find_all("pre"):
             for code in pre.find_all("code"):
-                code.replace_with("_CODE_")
+                code.replace_with("_CODE_. ")
         string_list = bs.stripped_strings
         return ' '.join(string_list).replace("\n", "")
 
-    @staticmethod
-    def contains_api_name(post):
+    @classmethod
+    def contains_api_name(cls, _sentence):
+        if not cls.api_alias_to_qualified_name_dict:
+            cls.load_api_name_dict()
         # 直接匹配API会匹出代码部分，要先把post里的<code>部分删掉？
-        re_1 = r'[a-zA-Z]([a-z]+)([A-Z][a-z]+)+'
-        re_2 = r'[a-zA-Z][a-z]+(\.[a-z]+)+'
-        search_obj_1 = re.search(re_1, post)
-        search_obj_2 = re.search(re_2, post)
-        if search_obj_1 and search_obj_2:
-            return True
-        return False
+
+        re_full_name = r'([a-z]+\.)*[A-Z][a-z]+\.[a-z]+([A-Z][a-z]+)*(\(\S*\))?'
+        # 这个表达式可以匹配完整API名，不管带不带参数，既要有包名也要有类名和方法名。带不带参数都可以。
+        re_camel_case_name = r'(([A-Za-z][a-z]+)+\.)?[a-z]+[A-Z][a-z]+(\(\S*\))?'
+        # 匹配驼峰式命名，匹配方法名+类名，也可能是对象名。类名可能不存在。带不带参数都可以
+        re_class_name = r'([a-z]+\.)+([A-Z][a-z]+)+(\(\S*\))?'
+        # 带包名的类名提及，带不带参数都可以。带就是构造函数
+        re_only_class_name = r'([A-Z][a-z]+)+(\(\S*\))'
+        # 不带包名的类名提及，一定要有参数 表示这是个构造函数。
+
+        search_res = [re.search(re_full_name, _sentence),
+                      re.search(re_camel_case_name, _sentence),
+                      re.search(re_class_name, _sentence),
+                      re.search(re_only_class_name, _sentence)]
+        for search_obj in search_res:
+            if search_obj:
+                matched_name = search_obj.group()
+                if matched_name in cls.api_alias_to_qualified_name_dict.keys():
+                    return {"sentence": _sentence, "qualified_name": cls.api_alias_to_qualified_name_dict[matched_name]}
+        return None
+
+    @classmethod
+    def load_api_name_dict(cls):
+        if not cls.api_alias_to_qualified_name_dict:
+            with open(PathUtil.api_name_from_jdk_graph()) as f:
+                cls.api_alias_to_qualified_name_dict = json.load(f)
