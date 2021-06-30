@@ -24,7 +24,10 @@ class Sentence:
         return True
 
     def __repr__(self):
-        return "<Sentence post_id=%r api=%s sentence=%s>" % (self.post_id, self.api, self.sentence)
+        return "<Sentence %s>" % (self.to_str())
+
+    def to_str(self):
+        return "post_id = %r api = %s sentence = %s" % (self.post_id, self.api, self.sentence)
 
     @staticmethod
     def from_dict(data: dict):
@@ -41,8 +44,50 @@ class SentenceCollection(SaveLoad):
         self.sentence_set = set([])
         self.id2sentence = {}
         self.sentence2id = {}
+        self.max_id = 0
 
     def add(self, sentence: Sentence):
+        if sentence is None:
+            return -1
         if sentence in self.sentence_set:
             return self.sentence2id[sentence]
 
+        self.sentence_set.add(sentence)
+        sentence_id = self.max_id
+        self.id2sentence[sentence_id] = sentence
+        self.sentence2id[sentence] = sentence_id
+        self.max_id = sentence_id + 1
+        return sentence_id
+
+    def remove(self, sentence: Sentence):
+        if sentence is None:
+            return
+        if sentence in self.sentence_set:
+            self.sentence_set.remove(sentence)
+        if sentence in self.sentence2id.keys():
+            sentence_id = self.sentence2id.pop(sentence)
+            if sentence_id in self.id2sentence.keys():
+                self.id2sentence.pop(sentence_id)
+
+    def remove_by_id(self, sentence_id):
+        sentence = self.get_sentence_by_id(sentence_id)
+        self.remove(sentence)
+
+    def get_sentence_by_id(self, sentence_id):
+        return self.id2sentence.get(sentence_id, None)
+
+    def get_id_by_sentence(self, sentence: Sentence):
+        if sentence is None:
+            return -1
+        if sentence not in self.sentence_set:
+            return -1
+        return self.sentence2id.get(sentence, -1)
+
+    def size(self) -> int:
+        return len(self.id2sentence.keys())
+
+    def __len__(self):
+        return self.size()
+
+    def get_all_task(self):
+        return self.sentence_set

@@ -72,6 +72,14 @@ class APIKnowledge:
             return False
         return True
 
+    def __repr__(self):
+        return "<Api knowledge %s>" % (self.to_str())
+
+    def to_str(self):
+        return "[api]: %s [objects]: %s" % \
+               (self.get_api(),
+                ",".join(list(["[%s = %s]" % (name, value) for name, value in self.object_map.items()])))
+
     @staticmethod
     def from_dict(data: dict):
         t = APIKnowledge(api=data[APIKnowledge.API], **data[APIKnowledge.OBJECTS])
