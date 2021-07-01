@@ -50,6 +50,9 @@ class APIKnowledge:
                 return name
         return None
 
+    def get_all_argument_values(self):
+        return self.object_map.values()
+
     def change_object_name(self, old_name, new_name):
         if not self.has_object(old_name):
             return
