@@ -24,7 +24,6 @@ class APIKnowledgeInstance:
     def __repr__(self):
         return "<APIKnowledgeInstance [sentence: %s] [api knowledge: %s]" % (self.sentence.to_str(),
                                                                              self.api_knowledge.to_str())
-
     def get_sentence(self):
         return self.sentence
 
@@ -43,6 +42,13 @@ class APIKnowledgeInstance:
             "api_knowledge": self.api_knowledge.to_dict()
         }
         return r
+
+    def update_arguments(self, **variable_name2_value_map):
+        for name, value in variable_name2_value_map.items():
+            self.update_argument(name, value)
+
+    def update_argument(self, variable_argument_name, variable_argument_value):
+        self.api_knowledge.update_argument(name=variable_argument_name, value=variable_argument_value)
 
 
 class APIKnowledgeInstanceCollection(SaveLoad):

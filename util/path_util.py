@@ -1,5 +1,6 @@
 from pathlib import Path
 from definitions import DATA_DIR, OUTPUT_DIR
+import time
 
 
 class PathUtil:
@@ -64,10 +65,10 @@ class PathUtil:
         return str(path / "{filename}_{date}.txt".format(filename=filename, date=date))
 
     @classmethod
-    def api_name_json(cls, time, filename="api_name"):
+    def api_name_json(cls, date, filename="api_name"):
         path = Path(DATA_DIR)
         path.mkdir(exist_ok=True)
-        return str(path / "{filename}_{time}.json".format(filename=filename, time=time))
+        return str(path / "{filename}_{date}.json".format(filename=filename, date=date))
 
     @classmethod
     def jdk_graph(cls, filename="jdk.v1.graph"):
@@ -92,3 +93,18 @@ class PathUtil:
         path = Path(DATA_DIR)
         path.mkdir(exist_ok=True)
         return str(path / "{filename}_{date}.csv".format(filename=filename, date=date))
+
+    @classmethod
+    def nlp_doc_cache(cls):
+        return str(Path(DATA_DIR) / "nlp_doc_cache.cache")
+
+    @classmethod
+    def log_file_named_with_current_time(cls, ):
+        """
+        获取一个可以写log的文件名,名字包含当前的时间
+        :return:
+        """
+        output_dir_log = Path(OUTPUT_DIR) / "log"
+        output_dir_log.mkdir(exist_ok=True, parents=True)
+        log_file_name = time.strftime("%Y%m%d-%H-%M", time.localtime())
+        return str(output_dir_log / "{name}.log".format(name=log_file_name))

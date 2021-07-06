@@ -1,15 +1,16 @@
 # sentence类，定义一个sentence的数据结构
 from kgdt.utils import SaveLoad
+from util.spacy_util import NLPUtil
 
 
 class Sentence:
     """
     储存Sentence的数据结构，和APIKnowledge可以组合成APIKnowledgeInstance
     """
-    def __init__(self, post_id, api, sentence):
+    def __init__(self, post_id, api, sentence: str):
         self.post_id = post_id
         self.api = api
-        self.sentence = sentence
+        self.sentence = NLPUtil.clean_sentence(sentence)
 
     def __hash__(self):
         return hash(self.sentence)

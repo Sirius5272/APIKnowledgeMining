@@ -8,7 +8,6 @@ from component.model.api_knowledge_instance import APIKnowledgeInstance
 class SentenceMatcher:
     # 添加一个缓存机制？
 
-
     def extract_api_knowledge_instances(self,
                                         sentence_list: List[Sentence],
                                         api_knowledge_list: Iterable[APIKnowledge]) -> List[APIKnowledgeInstance]:
@@ -53,7 +52,7 @@ class SentenceMatcher:
         for phrase in phrases_list:
             for sentence in sentence_list:
                 if phrase in sentence.sentence:
-                    if sentence in result.keys():
+                    if sentence not in result.keys():
                         result[sentence] = {phrase}
                     else:
                         result[sentence].add(phrase)

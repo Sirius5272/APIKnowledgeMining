@@ -6,7 +6,7 @@ class APIKnowledge:
     """
     描述一个抽象的API知识，不与具体的API sentence关联
     """
-    API = "API"
+    API = "api"
     OBJECTS = "objects"  # 所有不是API名的知识组成员都认为是objects。后面可能需要细化成action和adj。暂时全部以object概括
     ACTION = "action"
     ADJECTIVE = "adjective"  # 形容词和动词都不一定会出现。暂时先写下来，后面看怎么改。
@@ -39,6 +39,9 @@ class APIKnowledge:
             return True
         return False
 
+    def get_all_object_items(self):
+        return self.object_map.items()
+
     def get_object_by_key(self, key):
         if key not in self.object_map.keys():
             return None
@@ -63,7 +66,7 @@ class APIKnowledge:
 
     def __hash__(self):
         return hash(
-            self.api + " " + " ".join(set(self.object_map.items()))
+            self.api + " " + " ".join(set(self.get_all_argument_values()))
         )
 
     def __eq__(self, other):
@@ -94,6 +97,12 @@ class APIKnowledge:
             APIKnowledge.OBJECTS: self.object_map
         }
         return r
+
+    def update_argument(self, name, value):
+        if name == APIKnowledge.API:
+            self.api = value
+        else:
+            self.object_map[name] = value
 
 
 class APIKnowledgeCollection(SaveLoad):
@@ -153,4 +162,3 @@ class APIKnowledgeCollection(SaveLoad):
 
     def get_all_task(self):
         return self.APIKnowledge_set
-
