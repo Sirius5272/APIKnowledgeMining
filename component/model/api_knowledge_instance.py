@@ -2,6 +2,7 @@ from component.model.sentence import Sentence
 from component.model.api_knowledge import APIKnowledge
 import copy
 from kgdt.utils import SaveLoad
+from typing import Iterable, List, Set
 
 
 class APIKnowledgeInstance:
@@ -24,6 +25,7 @@ class APIKnowledgeInstance:
     def __repr__(self):
         return "<APIKnowledgeInstance [sentence: %s] [api knowledge: %s]" % (self.sentence.to_str(),
                                                                              self.api_knowledge.to_str())
+
     def get_sentence(self):
         return self.sentence
 
@@ -71,6 +73,10 @@ class APIKnowledgeInstanceCollection(SaveLoad):
         self.max_id = instance_id + 1
         return instance_id
 
+    def add_all(self, instance_list: Iterable[APIKnowledgeInstance]):
+        for t in instance_list:
+            self.add(t)
+
     def remove(self, instance: APIKnowledgeInstance):
         if instance is None:
             return
@@ -88,9 +94,44 @@ class APIKnowledgeInstanceCollection(SaveLoad):
     def get_instance_by_id(self, instance_id):
         return self.id2api_knowledge_instance.get(instance_id, None)
 
+    def to_id(self, instance: APIKnowledgeInstance) -> int:
+        if instance is None:
+            return -1
+        if instance not in self.api_knowledge_instance_set:
+            return -1
+        return self.api_knowledge_instance2id.get(instance)
+
+    def to_instance(self, instance_id: int) -> APIKnowledgeInstance:
+        return self.id2api_knowledge_instance.get(instance_id, None)
+
     def get_id_by_instance(self, instance):
         if instance is None:
             return -1
         if instance not in self.api_knowledge_instance_set:
             return -1
         return self.api_knowledge_instance2id.get(instance, -1)
+
+    def size(self) -> int:
+        return len(self.api_knowledge_instance2id.keys())
+
+    def simple_repr(self):
+        return "<APIKnowledgeInstanceCollection size=%r" % (self.size())
+
+    def __iter__(self):
+        for t in self.api_knowledge_instance2id.keys():
+            yield t
+
+    def __len__(self):
+        return self.size()
+
+    def to_instances(self, ids: Iterable[int]) -> List[APIKnowledgeInstance]:
+        result = []
+        for instance_id in set(ids):
+            instance = self.to_instance(instance_id)
+            if instance is None:
+                continue
+            result.append(instance)
+        return result
+
+    def new(self, instances: Iterable[APIKnowledgeInstance]) -> Set[APIKnowledgeInstance]:
+        return set(self) - set(instances)

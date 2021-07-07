@@ -179,7 +179,7 @@ class LogUtil:
     def error_clean_object(self):
         self.error("Error while cleaning object", )
 
-    def log_post_list_numbers(self, sentence_list: List[Sentence]):
+    def log_sentence_list_numbers(self, sentence_list: List[Sentence]):
         self.info("start with on %r sentences" % (len(sentence_list)))
 
     # def log_load_snowball_result_info(self, snowball_result: TaskSnowBallResult):

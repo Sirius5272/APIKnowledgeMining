@@ -1,5 +1,6 @@
 # API Knowledge类，储存API知识的多元组
 from kgdt.utils import SaveLoad
+from typing import Iterable, Set, List
 
 
 class APIKnowledge:
@@ -20,6 +21,7 @@ class APIKnowledge:
         self.api = api
         self.object_map = {}
         self.update_objects(object_map)
+        self.tow_gram_argument_tuples = set()
 
     def update_objects(self, object_map):
         for p, v in object_map.items():
@@ -104,6 +106,18 @@ class APIKnowledge:
         else:
             self.object_map[name] = value
 
+    def get_possible_argument_combination(self):
+        if len(self.tow_gram_argument_tuples) == 0:
+            for s in self.get_all_argument_values():
+                for e in self.get_all_argument_values():
+                    if s == e:
+                        continue
+                    if s < e:
+                        continue
+                    self.tow_gram_argument_tuples.add((s, e))
+            self.tow_gram_argument_tuples = set(self.tow_gram_argument_tuples)
+        return self.tow_gram_argument_tuples
+
 
 class APIKnowledgeCollection(SaveLoad):
     def __init__(self):
@@ -129,6 +143,10 @@ class APIKnowledgeCollection(SaveLoad):
         self.id2APIKnowledge[knowledge_id] = api_knowledge
         self.max_id = knowledge_id + 1
         return knowledge_id
+
+    def add_all(self, api_knowledge_list: Iterable[APIKnowledge]):
+        for each in api_knowledge_list:
+            self.add(each)
 
     def remove(self, api_knowledge: APIKnowledge):
         if api_knowledge is None:
@@ -162,3 +180,46 @@ class APIKnowledgeCollection(SaveLoad):
 
     def get_all_task(self):
         return self.APIKnowledge_set
+
+    def to_id(self, api_knowledge: APIKnowledge) -> int:
+        if api_knowledge is None:
+            return -1
+        if api_knowledge not in self.APIKnowledge_set:
+            return -1
+        return self.APIKnowledge2id.get(api_knowledge, -1)
+
+    def to_api_knowledge(self, api_knowledge_id: int) -> APIKnowledge:
+        return self.id2APIKnowledge.get(api_knowledge_id, None)
+
+    def to_ids(self, api_knowledge_list: Iterable[APIKnowledge]) -> Set[int]:
+        result = set()
+        for api_knowledge in api_knowledge_list:
+            api_knowledge_id = self.to_id(api_knowledge)
+            if api_knowledge_id < 0:
+                continue
+            result.add(api_knowledge_id)
+        return result
+
+    def to_api_knowledge_list(self, ids: Iterable[int]) -> List[APIKnowledge]:
+        result = []
+        for api_knowledge_id in set(ids):
+            instance = self.to_api_knowledge(api_knowledge_id)
+            if instance is None:
+                continue
+            result.append(instance)
+        return result
+
+    def simple_repr(self):
+        return "<APIKnowledgeCollection size=%r" % (self.size())
+
+    def __iter__(self):
+        for t in self.APIKnowledge2id.keys():
+            yield t
+
+    def new(self, tasks: Iterable[APIKnowledge]) -> Set[APIKnowledge]:
+        return set(self) - set(tasks)
+
+    def include(self, api_knowledge: APIKnowledge):
+        if api_knowledge is None:
+            return False
+        return api_knowledge in self.APIKnowledge_set
