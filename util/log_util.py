@@ -8,7 +8,7 @@ from component.model.factory.pattern_mutator import PatternMutator
 
 from component.model.pattern import PatternMatchingResultRecorder, Pattern
 from component.model.sentence import Sentence
-# from taskkg.model.snowball_result import TaskSnowBallResult
+from component.model.snowball_result import SnowBallResult
 from component.model.api_knowledge import APIKnowledge
 from component.model.api_knowledge_instance import APIKnowledgeInstance
 from util.path_util import PathUtil
@@ -107,17 +107,17 @@ class LogUtil:
         info = "\n".join([str(p.confidence) + ":" + str(p) for p in patterns])
         self.info(info)
 
-    # def log_api_knowledge_info(self, api_knowledge: Iterable[APIKnowledge], hint="extracted api knowledge"):
-    #     self.info(hint)
-    #     self.info("number=%d" % len(list(api_knowledge)))
-    #     info = "\n".join([str(p.confidence) + ":" + str(p) for p in api_knowledge])
-    #     self.info(info)
-    #
-    # def log_task_instances_info(self, task_instances: Iterable[TaskInstance], hint="extracted task instances"):
-    #     self.info(hint)
-    #     self.info("number=%d" % len(list(task_instances)))
-    #     info = "\n".join([str(p.confidence) + ":" + str(p) for p in task_instances])
-    #     self.info(info)
+    def log_api_knowledge_list_info(self, api_knowledge: Iterable[APIKnowledge], hint="extracted api knowledge list"):
+        self.info(hint)
+        self.info("number=%d" % len(list(api_knowledge)))
+        # info = "\n".join([str(p.confidence) + ":" + str(p) for p in api_knowledge])
+        # self.info(info)
+
+    def log_instances_list_info(self, instance_list: Iterable[APIKnowledgeInstance], hint="extracted instances list"):
+        self.info(hint)
+        self.info("number=%d" % len(list(instance_list)))
+        # info = "\n".join([str(p.confidence) + ":" + str(p) for p in task_instances])
+        # self.info(info)
 
     def log_instance_info(self, instance: APIKnowledgeInstance, hint="extracted instances"):
         self.info(hint)
@@ -160,15 +160,15 @@ class LogUtil:
         for s in matched_sentence_list:
             self.info("Matching! %r" % s)
 
-    # def log_snowball_result_info(self,
-    #                              snowball_result: TaskSnowBallResult,
-    #                              onlysize=False,
-    #                              hint="TaskSnowballResult"):
-    #     self.info(hint)
-    #     if onlysize is False:
-    #         self.info(snowball_result)
-    #     else:
-    #         self.info(snowball_result.simple_repr())
+    def log_snowball_result_info(self,
+                                 snowball_result: SnowBallResult,
+                                 only_size=False,
+                                 hint="SnowballResult"):
+        self.info(hint)
+        if only_size is False:
+            self.info(snowball_result)
+        else:
+            self.info(snowball_result.simple_repr())
 
     def error_matching_sentence_pattern(self):
         self.error("Error while matching on sentence with pattern")

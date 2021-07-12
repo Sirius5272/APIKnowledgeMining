@@ -1,6 +1,8 @@
-from typing import List, Iterable, Set
+from pathlib import Path
+from typing import List, Iterable, Set, Tuple
 from component.model.api_knowledge import APIKnowledge
 from component.model.api_knowledge_instance import APIKnowledgeInstance
+from component.model.pattern import Pattern
 from component.model.sentence import Sentence
 from component.model.snowball_result import SnowBallResult
 import copy
@@ -10,6 +12,7 @@ from component.model.factory.pattern_mutator import PatternMutator
 from component.selector.seed_selector import SeedSelector
 from component.matcher.sentence_matcher import SentenceMatcher
 from component.matcher.pattern_matcher import PatternMatcher
+from util.nlp_cache import NLPCache
 
 
 class Snowball:
@@ -30,16 +33,18 @@ class Snowball:
             max_step,
             save_by_step,
             seed_selector_path=None,
-            previous_snowball_result=None,
+            previous_snowball_result_path=None,
+            output_path=None
             ):
         """
         完整的调用入口，
+        :param output_path: 保存sbr的路径
         :param seed_api_knowledge_list:种子列表
         :param sentence_list:句子库
         :param max_step:最大迭代轮次
         :param save_by_step:每隔多少步保存一次
         :param seed_selector_path:用来记录哪些种子和instance已被抽取过的工具类
-        :param previous_snowball_result:之前的抽取结果缓存，如果给定可以接着上次的结果抽取
+        :param previous_snowball_result_path:之前的抽取结果缓存，如果给定可以接着上次的结果抽取
         :return:
         """
         # 构造seed_selector。这应该是一个类变量
@@ -51,8 +56,49 @@ class Snowball:
         # 如果达到了保存步数则保存SBR和seed selector
         # 结束循环，保存SBR和seed selector。保存NLP cache
         # 返回SBR
+        if seed_selector_path is None or Path(seed_selector_path).exists() is False:
+            self.seed_selector = SeedSelector()
+        else:
+            self.seed_selector: SeedSelector = SeedSelector.load(seed_selector_path)
 
-        pass
+        if previous_snowball_result_path is None or Path(previous_snowball_result_path).exists() is False:
+            final_snowball_result = SnowBallResult()
+        else:
+            final_snowball_result: SnowBallResult = SnowBallResult.load(previous_snowball_result_path)
+
+        self.log.log_api_knowledge_list_info(self.seed_selector.selected_api_knowledge_collection,
+                                             hint="used seed api knowledge list")
+        self.log.log_instances_list_info(self.seed_selector.selected_api_knowledge_instance_collection,
+                                         hint="used instance list")
+        final_snowball_result.add_api_knowledge_list(seed_api_knowledge_list)
+        self.seed_selector.add_used_api_knowledge(seed_api_knowledge_list)
+        # todo: 清理句子 过滤
+        self.log.log_num("original sentence number", len(sentence_list))
+        for step in range(1, max_step + 1):
+            if step == 1:
+                current_api_knowledge_seed_set = set(seed_api_knowledge_list)
+            else:
+                current_api_knowledge_seed_set = None
+            new_snowball_result = self.run_for_one_step(sentence_list=sentence_list,
+                                                        previous_snowball_result=final_snowball_result,
+                                                        current_api_knowledge_seed_set=current_api_knowledge_seed_set)
+
+            self.log.log_snowball_result_info(new_snowball_result,
+                                              hint="run_for_one_step snowball result step=%d" % step)
+            if save_by_step != -1 and step % save_by_step == 0:
+                if output_path is not None:
+                    final_snowball_result.save(output_path)
+                if seed_selector_path is not None:
+                    self.seed_selector.save(seed_selector_path)
+
+        if output_path is not None:
+            final_snowball_result.save(output_path)
+        if seed_selector_path is not None:
+            self.seed_selector.save(seed_selector_path)
+        NLPCache.save_doc()
+
+        # self.log.log_snowball_result_info(final_snowball_result, hint="final snowball result")
+        return final_snowball_result
 
     def run_for_one_step(self,
                          sentence_list: List[Sentence],
@@ -107,14 +153,13 @@ class Snowball:
         seed_instance_for_extract_pattern = self.seed_selector.select_new_seed_instance_list(
             instance_collection=previous_snowball_result.get_instance_collection()
         )
-        # todo:这里log_util都没有写复数的instance、api_knowledge的log，因为没有得分，要添加上。
-        # self.log.log_instance_info()
+
+        self.log.log_instances_list_info(seed_instance_for_extract_pattern,
+                                         hint="seed instance list for summary pattern")
         new_patterns = self.extract_pattern_from_instances(seed_instance_for_extract_pattern)
 
-        # todo: 把这个函数封装成本类函数，并且看一下那个helper怎么搞。
-        patterns_with_instance_relation = self.pattern_matcher.match_patterns(
-            patterns=new_patterns, sentence_list=sentence_list
-        )
+        patterns_with_instance_relation = self.extract_instance_based_patterns(pattern_list=new_patterns,
+                                                                               sentence_list=sentence_list)
         new_snowball_result.add_pattern_with_instance_relations(patterns_with_instance_relation)
         previous_snowball_result.add_pattern_with_instance_relations(patterns_with_instance_relation)
 
@@ -170,3 +215,6 @@ class Snowball:
             new_sentence_list.append(sentence)
         return new_sentence_list
 
+    def extract_instance_based_patterns(self, pattern_list: Iterable[Pattern], sentence_list: List[Sentence]) -> \
+            List[Tuple[Pattern, APIKnowledgeInstance]]:
+        return self.pattern_matcher.match_patterns(patterns=pattern_list, sentence_list=sentence_list)

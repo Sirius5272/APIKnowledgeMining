@@ -101,8 +101,8 @@ class SnowBallResult(SaveLoad):
             self.argument_tuple_2_instance_map[argument_tuple].add(instance_id)
 
     def __add_cache_between_api_knowledge_and_instance(self, api_knowledge_id, instance_id):
-        if api_knowledge_id not in self.api_2_instance_map:
-            self.api_2_instance_map[api_knowledge_id] = set()
+        if api_knowledge_id not in self.api_knowledge_2_instance_map:
+            self.api_knowledge_2_instance_map[api_knowledge_id] = set()
         if instance_id not in self.instance_2_api_knowledge_map:
             self.instance_2_api_knowledge_map[instance_id] = set()
         self.api_knowledge_2_instance_map[api_knowledge_id].add(instance_id)

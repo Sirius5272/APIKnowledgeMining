@@ -108,3 +108,20 @@ class PathUtil:
         output_dir_log.mkdir(exist_ok=True, parents=True)
         log_file_name = time.strftime("%Y%m%d-%H-%M", time.localtime())
         return str(output_dir_log / "{name}.log".format(name=log_file_name))
+
+    @classmethod
+    def seed_selector(cls):
+        """
+        selector保存的路径
+        :return:
+        """
+        return str(Path(OUTPUT_DIR) / "snowball_result_selector.cache")
+
+    @classmethod
+    def snowball_result(cls):
+        """
+        保存结果snowball_result的路径，这个会增量地增加内容。
+
+        :return:
+        """
+        return str(Path(OUTPUT_DIR) / "snowball_result.snr")
