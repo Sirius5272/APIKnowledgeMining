@@ -18,7 +18,7 @@ class PatternMutator:
             # 目前的实现一个句子只能有一个可以改变的变量
             return result
         # todo： 目前只有n-1 个argument会变成变量，之后结合数据考虑一下是否n个argument都可以变成变量呢
-        for num in range(1, pattern.argument_num()+1):
+        for num in range(1, pattern.argument_num()):
             new_patterns = self.mutate_with_multiple_holder(pattern=pattern, variable_num=num)
             result.extend(new_patterns)
         return result

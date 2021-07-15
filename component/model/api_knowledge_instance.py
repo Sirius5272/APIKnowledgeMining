@@ -135,3 +135,6 @@ class APIKnowledgeInstanceCollection(SaveLoad):
 
     def new(self, instances: Iterable[APIKnowledgeInstance]) -> Set[APIKnowledgeInstance]:
         return set(self) - set(instances)
+
+    def __repr__(self):
+        return "<InstanceCollection size=%d max_id=%d>" % (self.size(), self.max_id)

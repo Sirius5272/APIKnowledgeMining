@@ -208,9 +208,10 @@ class Snowball:
         :return:
         """
         new_sentence_list = []
-        used_sentence_set = set([instance.sentence.sentence for instance in instance_list])
+        used_sentence_set = set([instance.sentence.api + '\t' + instance.sentence.sentence for instance in instance_list])
         for sentence in sentence_list:
-            if sentence.sentence in used_sentence_set:
+            tmp_sent = sentence.api + '\t' + sentence.sentence
+            if tmp_sent in used_sentence_set:
                 continue
             new_sentence_list.append(sentence)
         return new_sentence_list

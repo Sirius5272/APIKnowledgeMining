@@ -50,19 +50,19 @@ class PathUtil:
     def api_sentence_classifier_model(cls, filename="api_sentence_model", date="0618"):
         path = Path(DATA_DIR)
         path.mkdir(exist_ok=True)
-        return str(path / "{filename}_{date}.bin".format(filename=filename, date=date))
+        return str(path / "classifier" / "{filename}_{date}.bin".format(filename=filename, date=date))
 
     @classmethod
     def api_sentence_classifier_train_data(cls, filename="api_sentence_train", date="0617"):
         path = Path(DATA_DIR)
         path.mkdir(exist_ok=True)
-        return str(path / "{filename}_{date}.txt".format(filename=filename, date=date))
+        return str(path / "classifier" / "{filename}_{date}.txt".format(filename=filename, date=date))
 
     @classmethod
     def api_sentence_classifier_test_data(cls, filename="api_sentence_test", date="0617"):
         path = Path(DATA_DIR)
         path.mkdir(exist_ok=True)
-        return str(path / "{filename}_{date}.txt".format(filename=filename, date=date))
+        return str(path / "classifier" / "{filename}_{date}.txt".format(filename=filename, date=date))
 
     @classmethod
     def api_name_json(cls, date, filename="api_name"):
@@ -72,6 +72,12 @@ class PathUtil:
 
     @classmethod
     def jdk_graph(cls, filename="jdk.v1.graph"):
+        path = Path(DATA_DIR)
+        path.mkdir(exist_ok=True)
+        return str(path / "{filename}".format(filename=filename))
+
+    @classmethod
+    def jdk_dc(cls, filename="jdk.v1.dc"):
         path = Path(DATA_DIR)
         path.mkdir(exist_ok=True)
         return str(path / "{filename}".format(filename=filename))
@@ -125,3 +131,7 @@ class PathUtil:
         :return:
         """
         return str(Path(OUTPUT_DIR) / "snowball_result.snr")
+
+    @classmethod
+    def positive_data_from_kg(cls):
+        return str(Path(OUTPUT_DIR) / "positive_data_from_kg.txt")

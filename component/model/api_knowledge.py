@@ -223,3 +223,6 @@ class APIKnowledgeCollection(SaveLoad):
         if api_knowledge is None:
             return False
         return api_knowledge in self.APIKnowledge_set
+
+    def __repr__(self):
+        return "<APIKnowledgeCollection size=%d max_id=%d>" % (self.size(), self.max_id)

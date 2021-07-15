@@ -100,3 +100,40 @@ class SentenceDataManager:
         if not cls.api_alias_to_qualified_name_dict:
             with open(PathUtil.api_name_from_jdk_graph()) as f:
                 cls.api_alias_to_qualified_name_dict = json.load(f)
+
+    @classmethod
+    def replace_api_with_placeholder(cls, sentence):
+        """
+        把句子中的API提及给替换成占位符。这个不返回识别到的api，因为这个会吧句子里的所有API都给替换掉。
+        :param sentence:
+        :return:
+        """
+        re_full_name = r'([a-z]+\.)*[A-Z][a-z]+\.[a-z]+([A-Z][a-z]+)*(\(\S*\))?'
+        # 这个表达式可以匹配完整API名，不管带不带参数，既要有包名也要有类名和方法名。带不带参数都可以。
+        re_camel_case_name = r'(([A-Za-z][a-z]+)+\.)?[a-z]+[A-Z][a-z]+(\(\S*\))?'
+        # 匹配驼峰式命名，匹配方法名+类名，也可能是对象名。类名可能不存在。带不带参数都可以
+        re_class_name = r'([a-z]+\.)+([A-Z][a-z]+)+(\(\S*\))?'
+        # 带包名的类名提及，带不带参数都可以。带就是构造函数
+        re_only_class_name = r'([A-Z][a-z]+)+(\(\S*\))'
+        # 不带包名的类名提及，一定要有参数 表示这是个构造函数。
+
+        rex_list = [
+            re_full_name, re_camel_case_name, re_class_name, re_only_class_name
+        ]
+        for rex in rex_list:
+            search_obj = re.search(rex, sentence)
+            while search_obj is not None:
+                temp_sentence = []
+                if search_obj:
+                    match_name = search_obj.group()
+                    if cls.nlp is None:
+                        cls.nlp = spacy_model()
+                    doc = cls.nlp(sentence)
+                    for token in doc:
+                        if match_name in str(token):
+                            temp_sentence.append("_api_")
+                        else:
+                            temp_sentence.append(str(token))
+                    sentence = " ".join(temp_sentence)
+                search_obj = re.search(rex, sentence)
+        return sentence

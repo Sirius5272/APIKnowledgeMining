@@ -13,3 +13,8 @@ class TestSentenceDataManager(TestCase):
         ]
         for sentence in sentences:
             print(SentenceDataManager.contains_api_name(sentence))
+
+    def test_replace_api_with_placeholder(self):
+        text = "Call addObserver() on AccountManager for each of the GUI classes."
+        new_text = SentenceDataManager.replace_api_with_placeholder(text)
+        print(new_text)

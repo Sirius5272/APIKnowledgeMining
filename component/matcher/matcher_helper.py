@@ -84,9 +84,7 @@ class PatternCollection(SaveLoad):
         return pattern in self.pattern_set
 
     def __repr__(self):
-        return "<PatternCollection size=%d max_id=%d>" % (self.size(), self.max_id) + "\n" + "\n".join(
-            ["%d:conf=%r %s" % (self.to_id(instance), instance.confidence, str(instance)) for instance in
-             self.pattern_set])
+        return "<PatternCollection size=%d max_id=%d>" % (self.size(), self.max_id)
 
     def simple_repr(self):
         return "<PatternCollection size=%r" % (self.size())

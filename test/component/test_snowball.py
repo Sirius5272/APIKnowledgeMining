@@ -16,40 +16,66 @@ class TestSnowball(TestCase):
         sentence_dict = [
             {
                 "post_id": 29508992,
-                "sentence": "Calling stringBuffer is thread_safe.",
-                "api": "com.sun.javafx.scene.control.skin.VirtualFlow.ArrayLinkedList.removeFirst()"
+                "sentence": "Calling -api- is thread-safe.",
+                "api": "stringBuffer"
             },
             {
                 "post_id": 5694471,
-                "sentence": "Use the listFiles() to retrieve an array of File objects for each file in the directory, "
+                "sentence": "Use the -api- to retrieve an array of File objects for each file in the directory, "
                             "and then call the getName() method to get the filename.",
-                "api": "java.io.File.listFiles()"
+                "api": "listFiles()"
 
             },
             {
                 "post_id": 25433848,
-                "sentence": "Collections.sort() will help you to compare values of different kinds of objects with "
+                "sentence": "-api- will help you to compare values of different kinds of objects with "
                             "each collection implementing java.util.Comparator would be a good possible option!",
-                "api": "java.util.Comparator"
+                "api": "Collections.sort()"
+            },
+            # 以下是下一轮可以挖出来的句子
+            {
+                "post_id": 29508242,
+                "sentence": "using -api- is thread-safe.",
+                "api": "stringBuffer"
+            },
+            {
+                "post_id": 32523662,
+                "sentence": "Calling -api- is thread-safe.",
+                "api": "hashMap"
+            },
+            {
+                "post_id": 27327397,
+                "sentence": "implement -api- is thread-safe.",
+                "api": "stringBuffer"
+            },
+            {
+                "post_id": 141674345,
+                "sentence": "implement -api- is good for your class.",
+                "api": "toString"
+            },
+            {
+                "post_id": 126876964,
+                "sentence": "In some way, not implement -api- is very dangerous for the program",
+                "api": "hashCode()"
             },
             # 以下是没有对应知识的句子
             {
                 "post_id": 59710690,
                 "sentence": "You must iterate, one way or another So now without iterating I want to set all the "
-                            "isActive flag to true, is it possible in java?",
-                "api": "javax.swing.text.DefaultCaret.isActive()"
+                            "-api- flag to true, is it possible in java?",
+                "api": "isActive"
             },
             {
                 "post_id": 45190206,
                 "sentence": "On the other hand, seeing that your Fruit is an interface rather than a base class, you"
-                            " can have each of the classes which implement that interface have a getName() method "
+                            " can have each of the classes which implement that interface have a -api- method "
                             "returning a different value.",
-                "api": "org.w3c.dom.html.HTMLTextAreaElement.getName()"
+                "api": "getName()"
             },
             {
                 "post_id": 19718656,
-                "sentence": "This Graphics g = panel.getGraphics(); is not how custom painting is done.",
-                "api": "java.awt.Graphics.Graphics()"
+                "sentence": "This Graphics g = -api-; is not how custom painting is done.",
+                "api": "panel.getGraphics()"
             }
         ]
         api_knowledge_dict = [
@@ -57,7 +83,7 @@ class TestSnowball(TestCase):
                 "api": "stringBuffer",
                 "objects": {
                     "object1": "Calling",
-                    "object2": "thread_safe"
+                    "object2": "thread-safe"
                 }
             },
             {
@@ -78,56 +104,81 @@ class TestSnowball(TestCase):
         sentence_list = [Sentence.from_dict(d) for d in sentence_dict]
         seed_knowledge_list = [APIKnowledge.from_dict(d) for d in api_knowledge_dict]
         snowball = Snowball()
-        snowball.run(sentence_list=sentence_list,
-                     seed_api_knowledge_list=seed_knowledge_list,
-                     max_step=2,
-                     save_by_step=-1,
-                     seed_selector_path=PathUtil.seed_selector(),
-                     output_path=PathUtil.snowball_result(),
-                     previous_snowball_result_path=PathUtil.snowball_result()
-                     )
-        print(snowball)
-
+        sbr = snowball.run(sentence_list=sentence_list,
+                           seed_api_knowledge_list=seed_knowledge_list,
+                           max_step=2,
+                           save_by_step=-1,
+                           seed_selector_path=PathUtil.seed_selector(),
+                           output_path=PathUtil.snowball_result(),
+                           previous_snowball_result_path=PathUtil.snowball_result()
+                           )
+        print(sbr)
 
     def test_run_for_one_step(self):
         # 分步骤测试一下是否能成功
         sentence_dict = [
             {
                 "post_id": 29508992,
-                "sentence": "Calling stringBuffer is thread_safe.",
-                "api": "com.sun.javafx.scene.control.skin.VirtualFlow.ArrayLinkedList.removeFirst()"
+                "sentence": "Calling -api- is thread-safe.",
+                "api": "stringBuffer"
             },
             {
                 "post_id": 5694471,
-                "sentence": "Use the listFiles() to retrieve an array of File objects for each file in the directory, "
+                "sentence": "Use the -api- to retrieve an array of File objects for each file in the directory, "
                             "and then call the getName() method to get the filename.",
-                "api": "java.io.File.listFiles()"
+                "api": "listFiles()"
 
             },
             {
                 "post_id": 25433848,
-                "sentence": "Collections.sort() will help you to compare values of different kinds of objects with "
+                "sentence": "-api- will help you to compare values of different kinds of objects with "
                             "each collection implementing java.util.Comparator would be a good possible option!",
-                "api": "java.util.Comparator"
+                "api": "Collections.sort()"
+            },
+            # 以下是下一轮可以挖出来的句子
+            {
+                "post_id": 29508242,
+                "sentence": "using -api- is thread-safe.",
+                "api": "stringBuffer"
+            },
+            {
+                "post_id": 32523662,
+                "sentence": "Calling -api- is thread-safe.",
+                "api": "hashMap"
+            },
+            {
+                "post_id": 27327397,
+                "sentence": "implement -api- is thread-safe.",
+                "api": "stringBuffer"
+            },
+            {
+                "post_id": 141674345,
+                "sentence": "implement -api- is good for your class.",
+                "api": "toString"
+            },
+            {
+                "post_id": 126876964,
+                "sentence": "In some way, not implement -api- is very dangerous for the program",
+                "api": "hashCode()"
             },
             # 以下是没有对应知识的句子
             {
                 "post_id": 59710690,
                 "sentence": "You must iterate, one way or another So now without iterating I want to set all the "
-                            "isActive flag to true, is it possible in java?",
-                "api": "javax.swing.text.DefaultCaret.isActive()"
+                            "-api- flag to true, is it possible in java?",
+                "api": "isActive"
             },
             {
                 "post_id": 45190206,
                 "sentence": "On the other hand, seeing that your Fruit is an interface rather than a base class, you"
-                            " can have each of the classes which implement that interface have a getName() method "
+                            " can have each of the classes which implement that interface have a -api- method "
                             "returning a different value.",
-                "api": "org.w3c.dom.html.HTMLTextAreaElement.getName()"
+                "api": "getName()"
             },
             {
                 "post_id": 19718656,
-                "sentence": "This Graphics g = panel.getGraphics(); is not how custom painting is done.",
-                "api": "java.awt.Graphics.Graphics()"
+                "sentence": "This Graphics g = -api-; is not how custom painting is done.",
+                "api": "panel.getGraphics()"
             }
         ]
         api_knowledge_dict = [
@@ -135,7 +186,7 @@ class TestSnowball(TestCase):
                 "api": "stringBuffer",
                 "objects": {
                     "object1": "Calling",
-                    "object2": "thread_safe"
+                    "object2": "thread-safe"
                 }
             },
             {
@@ -181,40 +232,40 @@ class TestSnowball(TestCase):
         sentence_dict = [
             {
                 "post_id": 29508992,
-                "sentence": "Calling stringBuffer is thread_safe.",
-                "api": "com.sun.javafx.scene.control.skin.VirtualFlow.ArrayLinkedList.removeFirst()"
+                "sentence": "Calling -api- is thread_safe.",
+                "api": "stringBuffer"
             },
             {
                 "post_id": 5694471,
-                "sentence": "Use the listFiles() to retrieve an array of File objects for each file in the directory, "
+                "sentence": "Use the -api- to retrieve an array of File objects for each file in the directory, "
                             "and then call the getName() method to get the filename.",
-                "api": "java.io.File.listFiles()"
+                "api": "listFiles()"
 
             },
             {
                 "post_id": 25433848,
-                "sentence": "Collections.sort() will help you to compare values of different kinds of objects with "
+                "sentence": "-api- will help you to compare values of different kinds of objects with "
                             "each collection implementing java.util.Comparator would be a good possible option!",
-                "api": "java.util.Comparator"
+                "api": "Collections.sort()"
             },
             # 以下是没有对应知识的句子
             {
                 "post_id": 59710690,
                 "sentence": "You must iterate, one way or another So now without iterating I want to set all the "
-                            "isActive flag to true, is it possible in java?",
-                "api": "javax.swing.text.DefaultCaret.isActive()"
+                            "-api- flag to true, is it possible in java?",
+                "api": "isActive"
             },
             {
                 "post_id": 45190206,
                 "sentence": "On the other hand, seeing that your Fruit is an interface rather than a base class, you"
-                            " can have each of the classes which implement that interface have a getName() method "
+                            " can have each of the classes which implement that interface have a -api- method "
                             "returning a different value.",
-                "api": "org.w3c.dom.html.HTMLTextAreaElement.getName()"
+                "api": "getName()"
             },
             {
                 "post_id": 19718656,
-                "sentence": "This Graphics g = panel.getGraphics(); is not how custom painting is done.",
-                "api": "java.awt.Graphics.Graphics()"
+                "sentence": "This Graphics g = -api-; is not how custom painting is done.",
+                "api": "panel.getGraphics()"
             }
         ]
         api_knowledge_dict = [

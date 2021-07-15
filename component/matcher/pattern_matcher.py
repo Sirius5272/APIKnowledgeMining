@@ -1,3 +1,4 @@
+import copy
 from typing import Iterable, Tuple, List, Dict, Optional
 from component.model.sentence import Sentence
 from component.model.pattern import Pattern, PatternMatchingResultRecorder
@@ -178,7 +179,7 @@ class PatternMatcher:
         instance_list = []
 
         var2matcher_map = self.generate_all_variable_matchers(pattern=pattern)
-        api_knowledge = pattern.get_api_knowledge()
+        api_knowledge = copy.deepcopy(pattern.get_api_knowledge())
         for sentence in sentence_list:
             var2value_map = self.extract_all_variables_for_posts(pattern=pattern, sentence=sentence,
                                                                  var2matcher_map=var2matcher_map)
@@ -186,7 +187,7 @@ class PatternMatcher:
                 self.log.info("invalid extract var2value %r : extracted from post=%s p=%s" % (
                     var2value_map, sentence.sentence, pattern))
                 continue
-
+            api_knowledge.set_api(sentence.api)
             instance = APIKnowledgeInstance(sentence=sentence, api_knowledge=api_knowledge)
             instance.update_arguments(**var2value_map)
             instance_list.append(instance)
