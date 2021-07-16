@@ -11,6 +11,7 @@ class Sentence:
         self.post_id = post_id
         self.api = api
         self.sentence = NLPUtil.clean_sentence(sentence)
+        self.raw_sentence = self.sentence
 
     def __hash__(self):
         return hash(self.sentence)
@@ -37,7 +38,7 @@ class Sentence:
                         sentence=data["sentence"])
 
     def to_dict(self):
-        return {"post_id": self.post_id, "api": self.api, "sentence": self.sentence}
+        return {"post_id": self.post_id, "api": self.api, "sentence": self.sentence, "raw_sentence": self.raw_sentence}
 
 
 class SentenceCollection(SaveLoad):

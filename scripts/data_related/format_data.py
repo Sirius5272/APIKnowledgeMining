@@ -4,7 +4,7 @@
 import random
 
 from util.path_util import PathUtil
-from util.tool import Tool
+from util.data_util import DataUtil
 import json
 import csv
 from scripts.data_related.generate_positive_data_from_kg import PositiveDataGenerator

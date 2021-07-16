@@ -40,9 +40,9 @@ def expand_positive_data_from_so():
     print(len(test_data))
     random.shuffle(new_train_data)
 
-    with open(PathUtil.api_sentence_classifier_train_data(date="0715_expand_placeholder"), 'w', encoding='utf-8') as f2:
+    with open(PathUtil.api_sentence_classifier_train_data(date="0716_expand_placeholder"), 'w', encoding='utf-8') as f2:
         f2.writelines(new_train_data)
-    with open(PathUtil.api_sentence_classifier_test_data(date="0715_expand_placeholder"), 'w', encoding='utf-8') as f3:
+    with open(PathUtil.api_sentence_classifier_test_data(date="0716_expand_placeholder"), 'w', encoding='utf-8') as f3:
         f3.writelines(test_data)
 
 

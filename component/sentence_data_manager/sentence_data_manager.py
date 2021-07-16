@@ -3,11 +3,14 @@
 从服务器上获取到post的body后，进行分句，然后存在本地json中。
 """
 import json
+
+import tqdm
 from bs4 import BeautifulSoup
 import re
 import pymysql
 from util.path_util import PathUtil
 from component.sentence_data_manager.spacy_model import spacy_model
+from util.data_util import DataUtil
 
 
 class SentenceDataManager:
@@ -131,9 +134,56 @@ class SentenceDataManager:
                     doc = cls.nlp(sentence)
                     for token in doc:
                         if match_name in str(token):
-                            temp_sentence.append("_api_")
+                            temp_sentence.append("-api-")
                         else:
                             temp_sentence.append(str(token))
                     sentence = " ".join(temp_sentence)
                 search_obj = re.search(rex, sentence)
         return sentence
+
+    @classmethod
+    def replace_api_with_placeholder_with_return(cls, sentence):
+        # 这个既返回替换了所有API的句子，也返回第一个被替换的API
+        re_full_name = r'([a-z]+\.)*[A-Z][a-z]+\.[a-z]+([A-Z][a-z]+)*(\(\S*\))?'
+        # 这个表达式可以匹配完整API名，不管带不带参数，既要有包名也要有类名和方法名。带不带参数都可以。
+        re_camel_case_name = r'(([A-Za-z][a-z]+)+\.)?[a-z]+[A-Z][a-z]+(\(\S*\))?'
+        # 匹配驼峰式命名，匹配方法名+类名，也可能是对象名。类名可能不存在。带不带参数都可以
+        re_class_name = r'([a-z]+\.)+([A-Z][a-z]+)+(\(\S*\))?'
+        # 带包名的类名提及，带不带参数都可以。带就是构造函数
+        re_only_class_name = r'([A-Z][a-z]+)+(\(\S*\))'
+        # 不带包名的类名提及，一定要有参数 表示这是个构造函数。
+
+        rex_list = [
+            re_full_name, re_camel_case_name, re_class_name, re_only_class_name
+        ]
+        api_list = []
+        for rex in rex_list:
+            search_obj = re.search(rex, sentence)
+            while search_obj is not None:
+                temp_sentence = []
+                if search_obj:
+                    match_name = search_obj.group()
+                    if cls.nlp is None:
+                        cls.nlp = spacy_model()
+                    doc = cls.nlp(sentence)
+                    for token in doc:
+                        if match_name in str(token):
+                            temp_sentence.append("-api-")
+                            api_list.append(str(token))
+                        else:
+                            temp_sentence.append(str(token))
+                    sentence = " ".join(temp_sentence)
+                search_obj = re.search(rex, sentence)
+        return [sentence, api_list[0]]
+
+    @staticmethod
+    def generate_all_sentence_set():
+        sentence_data = json.load(open(PathUtil.sentence_data_from_answer_json(), 'r', encoding='utf-8'))
+        all_sentence_dict = []
+        for sentence in tqdm.tqdm(sentence_data):
+            raw_sentence = sentence["sentence"].replace("_CODE_", "-code-")
+            sentence_api_pair = SentenceDataManager.replace_api_with_placeholder_with_return(raw_sentence)
+            temp_dict = {"post_id": sentence["id"], "sentence": sentence_api_pair[0], "api": sentence_api_pair[1]}
+            all_sentence_dict.append(temp_dict)
+        DataUtil.write_list_to_json(all_sentence_dict, PathUtil.all_sentence_dict())
+

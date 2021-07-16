@@ -135,3 +135,11 @@ class PathUtil:
     @classmethod
     def positive_data_from_kg(cls):
         return str(Path(OUTPUT_DIR) / "positive_data_from_kg.txt")
+
+    @classmethod
+    def all_sentence_dict(cls):
+        return str(Path(DATA_DIR) / "all_sentence_dict.json")
+
+    @classmethod
+    def filtered_sentence_dict(cls, score=0.4):
+        return str(Path(DATA_DIR) / "filtered_sentence_dict_{score}.json".format(score=score))

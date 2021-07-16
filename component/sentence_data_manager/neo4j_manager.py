@@ -1,5 +1,5 @@
 from py2neo import Graph, Relationship, NodeMatcher
-from util.tool import Tool
+from util.data_util import DataUtil
 from util.path_util import PathUtil
 import tqdm
 
@@ -44,7 +44,7 @@ if __name__ == "__main__":
             name_list.append(tmp_dict)
 
         if (i+1) % 10 == 0:
-            Tool.write_list_to_json(name_list, PathUtil.api_name_json((i+1)/10))
+            DataUtil.write_list_to_json(name_list, PathUtil.api_name_json((i+1)/10))
             name_list.clear()
     print("finish match node")
 

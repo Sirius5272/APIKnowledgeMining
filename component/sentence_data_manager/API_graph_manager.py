@@ -1,6 +1,6 @@
 from sekg.graph.exporter.graph_data import GraphData
 from util.path_util import PathUtil
-from util.tool import Tool
+from util.data_util import DataUtil
 
 
 class APIGraphManager:
@@ -36,7 +36,7 @@ class APIGraphManager:
                     short_name_without_param = short_name.split("(")[0]
                     api_name_list[short_name_without_param] = qualified_name
 
-        Tool.write_list_to_json(api_name_list, PathUtil.api_name_from_jdk_graph())
+        DataUtil.write_list_to_json(api_name_list, PathUtil.api_name_from_jdk_graph())
 
 
 if __name__ == "__main__":
