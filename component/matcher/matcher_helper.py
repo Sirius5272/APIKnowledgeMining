@@ -128,7 +128,8 @@ class MatcherHelper(SaveLoad):
 
     def add_patterns(self, patterns):
         for p in patterns:
-            self.add_pattern(p)
+            if p is not None:
+                self.add_pattern(p)
 
     def get_pattern(self, name) -> Pattern:
         return self.pattern_collection.get_pattern(name)

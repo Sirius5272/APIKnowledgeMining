@@ -35,6 +35,8 @@ class SentenceMatcher:
                 api_knowledge = api_knowledge_list[index]
                 if set(api_knowledge.get_all_argument_values()) <= set(phrase_list):
                     api_knowledge_sentence_matched_relation.append((api_knowledge, sentence))
+                    # 在这里，只要对一个api knowledge找到了匹配上的sentence，就跳出，即一个sentence只匹配一次
+                    break
 
         result = []
         for api_knowledge, sentence in api_knowledge_sentence_matched_relation:

@@ -30,13 +30,19 @@ class APIGraphManager:
             api_name_list[qualified_name] = qualified_name
             if "." in qualified_name:
                 short_name = qualified_name.split(".")[-1]
-                api_name_list[short_name] = qualified_name
+                if short_name not in api_name_list.keys():
+                    api_name_list[short_name] = [qualified_name]
+                else:
+                    api_name_list[short_name].append(qualified_name)
 
                 if "(" in short_name:
                     short_name_without_param = short_name.split("(")[0]
-                    api_name_list[short_name_without_param] = qualified_name
+                    if short_name_without_param not in api_name_list.keys():
+                        api_name_list[short_name_without_param] = [qualified_name]
+                    else:
+                        api_name_list[short_name_without_param].append(qualified_name)
 
-        DataUtil.write_list_to_json(api_name_list, PathUtil.api_name_from_jdk_graph())
+        DataUtil.write_list_to_json(api_name_list, PathUtil.api_name_from_jdk_graph_new())
 
 
 if __name__ == "__main__":

@@ -89,6 +89,12 @@ class PathUtil:
         return str(path / "{filename}".format(filename=filename))
 
     @classmethod
+    def api_name_from_jdk_graph_new(cls, filename="new_jdk_api_name.json"):
+        path = Path(DATA_DIR)
+        path.mkdir(exist_ok=True)
+        return str(path / "{filename}".format(filename=filename))
+
+    @classmethod
     def test_data_json(cls, filename='test.json'):
         path = Path(DATA_DIR)
         path.mkdir(exist_ok=True)
@@ -133,6 +139,10 @@ class PathUtil:
         return str(Path(OUTPUT_DIR) / "snowball_result.snr")
 
     @classmethod
+    def snowball_result_after_filter(cls):
+        return str(Path(OUTPUT_DIR) / "snowball_result_after_filter.snr")
+
+    @classmethod
     def positive_data_from_kg(cls):
         return str(Path(OUTPUT_DIR) / "positive_data_from_kg.txt")
 
@@ -143,3 +153,11 @@ class PathUtil:
     @classmethod
     def filtered_sentence_dict(cls, score=0.4):
         return str(Path(DATA_DIR) / "filtered_sentence_dict_{score}.json".format(score=score))
+
+    @classmethod
+    def seed_api_knowledge_list(cls):
+        return str(Path(DATA_DIR) / "seed_api_knowledge.json")
+
+    @classmethod
+    def seed_sentence_list(cls):
+        return str(Path(DATA_DIR) / "seed_sentence.json")

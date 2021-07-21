@@ -13,6 +13,8 @@ from component.selector.seed_selector import SeedSelector
 from component.matcher.sentence_matcher import SentenceMatcher
 from component.matcher.pattern_matcher import PatternMatcher
 from util.nlp_cache import NLPCache
+from component.filter.filter import Filter
+from component.model.factory.api_knowledge_mutator.mutate_manager import APIKnowledgeMutateManager
 
 
 class Snowball:
@@ -26,6 +28,8 @@ class Snowball:
         self.seed_selector = SeedSelector()
         self.sentence_matcher = SentenceMatcher()
         self.pattern_matcher = PatternMatcher()
+        self.filter = Filter()
+        self.mutate_manager = APIKnowledgeMutateManager()
 
     def run(self,
             seed_api_knowledge_list: List[APIKnowledge],
@@ -72,11 +76,15 @@ class Snowball:
                                          hint="used instance list")
         final_snowball_result.add_api_knowledge_list(seed_api_knowledge_list)
         self.seed_selector.add_used_api_knowledge(seed_api_knowledge_list)
-        # todo: 清理句子 过滤
+        # 加上一步清理sentence的过程，主要是清理掉一些不合法的api，被识别成API的doc网址。
+        sentence_list = self.filter.filter_sentence_by_api(sentence_list)
         self.log.log_num("original sentence number", len(sentence_list))
         for step in range(1, max_step + 1):
             if step == 1:
                 current_api_knowledge_seed_set = set(seed_api_knowledge_list)
+                # 加了一步筛选
+                current_api_knowledge_seed_set = self.filter.filter_api_knowledge_by_invalid_object(
+                    current_api_knowledge_seed_set)
             else:
                 current_api_knowledge_seed_set = None
             new_snowball_result = self.run_for_one_step(sentence_list=sentence_list,
@@ -137,33 +145,53 @@ class Snowball:
             current_api_knowledge_seed_set = self.seed_selector.select_new_seed_api_knowledge_list(
                 previous_snowball_result.get_api_knowledge_collection()
             )
+        # 对种子的筛选放在每一轮的尾部。
 
+        # 步骤0， 对seed api knowledge进行变异
+        after_mutated_knowledge = self.mutate_api_knowledge(current_api_knowledge_seed_set)
         new_snowball_result = SnowBallResult()
+        # 步骤1， 根据api knowledge从句子库中抽取出api knowledge instance
         api_knowledge_based_instance_list = self.sentence_matcher.extract_api_knowledge_instances(
-            sentence_list=sentence_list, api_knowledge_list=current_api_knowledge_seed_set
+            sentence_list=sentence_list, api_knowledge_list=after_mutated_knowledge
         )
+        # instance在这里先筛选 再加入new sbr
+        api_knowledge_based_instance_list = self.filter.filter_instance_by_invalid_object(
+            api_knowledge_based_instance_list)
+
         new_snowball_result.add_instances(api_knowledge_based_instance_list)
         previous_snowball_result.add_instances(api_knowledge_based_instance_list)
         # 这里存疑。parent api knowledge要看看是什么意思
         previous_snowball_result.add_api_knowledge_list(current_api_knowledge_seed_set)
+        # 对抽取的句子库过滤。我们认为一个句子被抽取过之后就没有利用价值，下一轮不会再被抽取了。
         sentence_list = self.filter_used_sentence(sentence_list=sentence_list,
                                                   instance_list=previous_snowball_result.get_instance_collection())
         self.log.log_sentence_list_numbers(sentence_list)
-
+        # 挑选出新的seed instance
         seed_instance_for_extract_pattern = self.seed_selector.select_new_seed_instance_list(
             instance_collection=previous_snowball_result.get_instance_collection()
         )
 
         self.log.log_instances_list_info(seed_instance_for_extract_pattern,
                                          hint="seed instance list for summary pattern")
+        # 步骤2， 根据instance，总结出pattern并且变异出新的pattern。
         new_patterns = self.extract_pattern_from_instances(seed_instance_for_extract_pattern)
+        # 过滤一次这些变异出来的pattern
+        new_patterns = self.filter.filter_patterns_by_invalid_object(new_patterns)
 
+        # 步骤3， 根据变异出来的patterns，从句子库中抽取出匹配的实例instance
         patterns_with_instance_relation = self.extract_instance_based_patterns(pattern_list=new_patterns,
                                                                                sentence_list=sentence_list)
+        # 过筛！
+        patterns_with_instance_relation = self.filter.filter_relation_between_pattern_and_instance(
+            patterns_with_instance_relation)
+
         new_snowball_result.add_pattern_with_instance_relations(patterns_with_instance_relation)
         previous_snowball_result.add_pattern_with_instance_relations(patterns_with_instance_relation)
 
+        # 步骤4， 根据基于pattern抽取出来的instance，总结出对应的api knowledge
         new_api_knowledge_list = self.extract_api_knowledge_from_instances(patterns_with_instance_relation)
+        # 过筛
+        new_api_knowledge_list = self.filter.filter_api_knowledge_by_invalid_object(new_api_knowledge_list)
         new_snowball_result.add_api_knowledge_list(new_api_knowledge_list)
         previous_snowball_result.add_api_knowledge_list(new_api_knowledge_list)
         # 一步加入parent api knowledge
@@ -177,6 +205,7 @@ class Snowball:
 
         # todo: 这里可能需要加一道筛选
         self.log.log_num(number=len(all_knowledge), hint="summary knowledge from extracted instances")
+        all_knowledge = self.filter.filter_api_knowledge_by_invalid_object(all_knowledge)
         for knowledge in all_knowledge:
             self.log.log_api_knowledge_info(api_knowledge=knowledge,
                                             hint="valid summary knowledge from extracted instances")
@@ -219,3 +248,10 @@ class Snowball:
     def extract_instance_based_patterns(self, pattern_list: Iterable[Pattern], sentence_list: List[Sentence]) -> \
             List[Tuple[Pattern, APIKnowledgeInstance]]:
         return self.pattern_matcher.match_patterns(patterns=pattern_list, sentence_list=sentence_list)
+
+    def mutate_api_knowledge(self, current_seed_knowledge_set: Iterable[APIKnowledge]) -> Set[APIKnowledge]:
+        self.log.log_api_knowledge_list_info(api_knowledge=current_seed_knowledge_set, hint="original current knowledge")
+        mutated_set = self.mutate_manager.mutate_knowledge_list(current_seed_knowledge_set)
+        current_seed_knowledge_set = mutated_set | current_seed_knowledge_set
+        self.log.log_num(number=len(current_seed_knowledge_set), hint="seed tasks after mutation")
+        return set(current_seed_knowledge_set)

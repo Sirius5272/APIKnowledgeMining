@@ -41,6 +41,9 @@ class APIKnowledge:
             return True
         return False
 
+    def get_all_object_names(self):
+        return self.object_map.keys()
+
     def get_all_object_items(self):
         return self.object_map.items()
 
@@ -87,6 +90,19 @@ class APIKnowledge:
         return "[api]: %s [objects]: %s" % \
                (self.get_api(),
                 ",".join(list(["[%s = %s]" % (name, value) for name, value in self.object_map.items()])))
+
+    def delete_object_by_value(self, argument_value):
+        object_name = self.get_object_name_by_value(argument_value)
+        if object_name is None:
+            return
+        self.delete_object_by_name(object_name=object_name)
+
+    def delete_object_by_name(self, object_name):
+        if not self.has_object(object_name):
+            return False
+        del self.object_map[object_name]
+        self.tow_gram_argument_tuples = set()
+        return True
 
     @staticmethod
     def from_dict(data: dict):

@@ -61,6 +61,7 @@ class PatternMatcher:
                                                                                 sentence_list=sentences)
             for task_instance in task_instance_list:
                 pattern_with_task_instance_relations.append((pattern, task_instance))
+
         return pattern_with_task_instance_relations
 
     def filter_sentences_and_patterns(self, sentence_list: Iterable[Sentence], patterns: Iterable[Pattern]):
