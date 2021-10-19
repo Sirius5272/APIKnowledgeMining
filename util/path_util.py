@@ -161,3 +161,7 @@ class PathUtil:
     @classmethod
     def seed_sentence_list(cls):
         return str(Path(DATA_DIR) / "seed_sentence.json")
+
+    @classmethod
+    def api_knowledge_kg(cls):
+        return str(Path(OUTPUT_DIR) / "api_knowledge_kg.kg")
